@@ -1,14 +1,14 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[1]:
+
 
 
 get_ipython().magic('load_ext autoreload')
 get_ipython().magic('reload_ext autoreload')
 
 
-# In[7]:
+
 
 
 import requests
@@ -58,13 +58,12 @@ import imp
 #import load_data as load_data
 
 
-# In[8]:
+
 
 
 get_ipython().run_cell_magic('bash', '', 'jupyter nbconvert Nobel_prize_crawl.ipynb --to script')
 
 
-# In[2]:
 
 
 def strip_accents(text):
@@ -87,7 +86,7 @@ def strip_accents(text):
     return str(text)
 
 
-# In[3]:
+
 
 
 def copytofile(raw_html,filename):
@@ -95,7 +94,7 @@ def copytofile(raw_html,filename):
         outfile.write(raw_html)
 
 
-# In[4]:
+
 
 
 #retrieve nobel prize lauarates from main WIKI page
@@ -130,14 +129,14 @@ for each_tr_element in tr_elements:
             list_of_nobel_prize_winners.append([int(year),re.sub(r"\(chemist\)|\(physicist\)",'',clean_data.strip_accents(winner_title[0])),winner_href[0],parse_web.urlCanonicalization(winner_href[0], base_url=nobel_prize_page)])
 
 
-# In[5]:
+
 
 
 #creating dataframe with winners,year they were awarded and url of the winner page
 nobel_prize_winners=pd.DataFrame(list_of_nobel_prize_winners,columns=['Year','Name','Url','Cannonicalized_Url'])
 
 
-# In[6]:
+
 
 
 #to retrieve all information relevant information available in the winner page in WIKI
@@ -163,28 +162,28 @@ def update_winner_information(prize_type,prize_winners_dataframe,path_to_store_c
     return winner_wiki_information
 
 
-# In[ ]:
+
 
 
 nobel_winner_wiki_information=update_winner_information('nobel',nobel_prize_winners,'/home/apoorva_kasoju2712/nobel_crawled_data')
 
 
-# In[50]:
 
 
-import pickle 
+
+ #store nobel_winner_wiki_information as pickled file
 with open('/home/apoorva_kasoju2712/wos_samplecode/nobel_winner_wiki_p.pickle', 'wb') as handle:
     pickle.dump(nobel_winner_wiki_information, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
 
-# In[26]:
 
 
+#retrieve stored nobel_winner_wiki_information
 with open('/home/apoorva_kasoju2712/wos_samplecode/nobel_winner_wiki_p.pickle', 'rb') as handle:
     nobel_winner_wiki_information = pickle.load(handle)
 
 
-# In[ ]:
+
 
 
 path2rawdata='/home/apoorva_kasoju2712/WOS_data'
@@ -232,14 +231,14 @@ author_address=pd.merge(author_df[['ArticleID','FullName', 'LastName', 'FirstNam
 author_address=pd.read_hdf('/home/apoorva_kasoju2712/wos_samplecode/author_address_data.h5','author_address')
 
 
-# In[ ]:
+
 
 
 #getting relevant records for nobel prize winners matching in the WOS
 nobel_author_df=match_utilities.get_wos_records(nobel_winner_wiki_information,author_df)
 
 
-# In[19]:
+
 
 
 #storing the relevant data to hdf5 
@@ -255,7 +254,7 @@ prize_type='nobel'
 nobel_author_df=pd.read_hdf('/home/apoorva_kasoju2712/wos_samplecode/'+prize_type+'_author_df_data.h5',prize_type+'_author_df')
 
 
-# In[11]:
+
 
 
 #retrieving co-authors for the articles in nobel_author_df
@@ -266,7 +265,7 @@ nobel_article_co_author.to_pickle("/home/apoorva_kasoju2712/wos_samplecode/nobel
 #nobel_article_co_author=pd.read_pickle("/home/apoorva_kasoju2712/wos_samplecode/nobel_article_co_author_df.pkl")
 
 
-# In[14]:
+
 
 
 #retrieving nobel_author_df articles from article_df  
@@ -274,7 +273,7 @@ nobel_author_article=pd.merge(article_df[['ArticleID','Title']],nobel_author_df[
 nobel_author_article.dropna(subset=['AuthorDAIS'],inplace=True)
 
 
-# In[15]:
+
 
 
 #retrieving address information(organization) for authors in nobel_author_df 
@@ -285,14 +284,14 @@ nobel_author_address.dropna(subset=['AuthorDAIS'],inplace=True)
 nobel_author_address_article=pd.merge(nobel_author_address[['ArticleID','FullName', 'LastName', 'FirstName','Organization','AuthorDAIS']],nobel_author_article[['ArticleID','Title','AuthorDAIS']],on=['AuthorDAIS','ArticleID'], how='left')
 
 
-# In[ ]:
+
 
 
 #finding best match for authors in nobel_author_df from WOS using organization,co_authorships,decision_vector(author full_names) features retrieved from WIKIPEDIA
 match_title_dict,high_score_dict,match_co_author_dict,no_match_dict,tie_match_dict=match_utilities.find_best_match(nobel_winner_wiki_information,nobel_author_address_article,nobel_article_co_author)
 
 
-# In[ ]:
+
 
 
 #update winner information with their WOS ID matched

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[1]:
+
 
 
 import pandas as pd
@@ -13,7 +13,7 @@ import WOSutilities as wosutil
 path2rawdata='/home/apoorva_kasoju2712/WOS_data'
 
 
-# In[ ]:
+
 
 
 def load_author_data():
@@ -47,7 +47,7 @@ def load_author_data():
     return author_df
 
 
-# In[ ]:
+
 
 
 def load_article_data():
@@ -117,7 +117,7 @@ def load_article_data():
     return article_df
 
 
-# In[ ]:
+
 
 
 def load_address_data():
@@ -169,7 +169,7 @@ def load_address_data():
     return address_df
 
 
-# In[ ]:
+
 
 
 def load_paper_address_data():

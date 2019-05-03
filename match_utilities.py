@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[43]:
+
 
 
 import re
@@ -16,13 +16,13 @@ import enchant
 d = enchant.Dict('en_US')
 
 
-# In[38]:
+
 
 
 get_ipython().run_cell_magic('bash', '', 'jupyter nbconvert match_utilities.ipynb --to script')
 
 
-# In[44]:
+
 
 
 #creating dataframe to store author information based on last name candidates for crawled authors
@@ -63,12 +63,11 @@ def get_wos_records(nobel_winner_wiki_information,author_df):
     return author_new_df
 
 
-# In[45]:
+
 
 
 def check_if_initial(firstmiddleparts,crawled_firstmidlleparts):
     first_name=firstmiddleparts[0]
-#     print(first_name)
     if len(first_name)==1:
         return False  
     if len(crawled_firstmidlleparts)==len(first_name):
@@ -82,7 +81,7 @@ def check_if_initial(firstmiddleparts,crawled_firstmidlleparts):
         return False  
 
 
-# In[46]:
+
 
 
 def vector_for_match_names(set_of_wos_names,set_of_wiki_names):
@@ -134,7 +133,6 @@ def vector_for_match_names(set_of_wos_names,set_of_wiki_names):
     set_wos_first_middle.sort()
     set_wos_first_middle=list(set_wos_first_middle for set_wos_first_middle,_ in itertools.groupby(set_wos_first_middle))
     set_wos_first_middle = [x for x in set_wos_first_middle if x != []]
-   # print("wos",set_wos_first_middle)
    # char 1 -> If First_name(WOS)==First_name(Wikipedia)
     vector.append(0 if len(set([each_first_middle[0] for each_first_middle in set_wiki_first_middle]).intersection(set([each_first_middle[0] for each_first_middle in set_wos_first_middle])))==0 else 1)
    #char 2 -> If First_name(WOS)==Middle_name(Wikipedia) or Middle_name(WOS)==First_name(Wikipedia)
@@ -153,7 +151,7 @@ def vector_for_match_names(set_of_wos_names,set_of_wiki_names):
     return ''.join(map(str,vector))
 
 
-# In[50]:
+
 
 
 def match_co_authors(list_of_articleID,list_of_last_names,co_authors,title_co_authors,article_co_author):
@@ -188,16 +186,12 @@ def match_co_authors(list_of_articleID,list_of_last_names,co_authors,title_co_au
             if  len(list_of_wos_last_names)>0:  
                 for x in itertools.product(list_of_wos_last_names,list_of_wiki_last_names) :
                     if fuzz.token_sort_ratio(*x) >=90:
-                  #  print("x is ",x)
                         wos_set=set()
-                   # print("value at wos",list_of_wos_last_and_full[(list_of_wos_last_names.index(x[0]))][1])
                         wos_set.add(list_of_wos_last_and_full[(list_of_wos_last_names.index(x[0]))][1])
                         wiki_set=set()
-                  #  print("value at wiki",list_of_wiki_last_and_full[(list_of_wiki_last_names.index(x[1]))][1])
                         wiki_set.add(list_of_wiki_last_and_full[(list_of_wiki_last_names.index(x[1]))][1])
                         score_vector=vector_for_match_names(wos_set,wiki_set) 
                         if sum(map(int,list(score_vector[:-1])) )-int(score_vector[-1]) >=1:
-                          #  print("here",list_of_wos_last_and_full[(list_of_wos_last_names.index(x[0]))][1])
                             num_of_matches.add(list_of_wos_last_and_full[(list_of_wos_last_names.index(x[0]))][1])  
             
     if title_co_authors:
@@ -214,7 +208,6 @@ def match_co_authors(list_of_articleID,list_of_last_names,co_authors,title_co_au
         if  len(list_of_wos_full_names)>0:  
             for x in itertools.product(list_of_wos_full_names,list_of_title_coauthor_names) :
                 if fuzz.token_sort_ratio(*x) >=97:
-                   # print(x[0],x[1],fuzz.token_sort_ratio(*x))
                     num_of_matches.add(x[0])
     return len(num_of_matches)    
 def match_articles(list_of_wos_articles,list_of_wiki_articles):
@@ -235,7 +228,6 @@ def match_organizations(list_of_wos_institutions,list_of_wiki_institutions):
 
 
 
-# In[51]:
 
 
 def find_best_match(author_wiki_information,author_address_article_new,article_co_author):

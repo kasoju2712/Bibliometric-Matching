@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[11]:
+
 
 
 from urllib.parse import urljoin, urlparse
@@ -25,24 +25,22 @@ from dateutil.parser import parse
 import langid
 
 
-# In[20]:
+
 
 
 get_ipython().run_cell_magic('bash', '', 'jupyter nbconvert parse_web.ipynb --to script')
 
 
-# In[12]:
+
 
 
 #to checkness politenss policy and canonicalization of url
 def ispolite(absolute_url):
-    #print("at ispolite")
     scheme, netloc_host, path, params, query, fragment = urlparse(absolute_url)
     url = scheme + "://" + netloc_host
     robotUrl = url + "/robots.txt"
     try:
         if robotUrl not in robot_dict:
-   # print("r",robotUrl)
             rp = urllib.robotparser.RobotFileParser()
             rp.set_url(robotUrl)
             rp.read()
@@ -66,7 +64,6 @@ def normalize_slashes(url):
     return normalized_url
 
 def urlCanonicalization(url, base_url=None):
-    #url = url.lower()
     if not url.startswith("http"):
         url = urljoin(base_url, url)
     if url.startswith("http") and url.endswith(":80"):
@@ -79,7 +76,7 @@ def urlCanonicalization(url, base_url=None):
     return url
 
 
-# In[13]:
+
 
 
 #get alma_institution/affliations from winner wiki page
@@ -99,8 +96,6 @@ def parse_institutions(institution_page):
             return (institute_name.lower())
     return None
 
-
-# In[14]:
 
 
 #get articles/publication information from known page(infobox card) of winner wiki page
@@ -138,7 +133,7 @@ def parse_known_for(known_for_page,list_of_names):
     return new_articles
 
 
-# In[15]:
+
 
 
 #check if string is valid date
@@ -157,26 +152,21 @@ def is_date(string, fuzzy=False):
         return False
 
 
-# In[16]:
+
 
 
 #to detect language of titles(articles)
 def detect_lang_and_retrieve(article):
-    #print(article)
     match=re.search(r'\((.*?)\)',article)
-    #print(match.groups(1))
     if match and len(match.groups())==1:
         x=re.sub(r'\(.*\)', '', article)
-        #print(x)
-    
         if x!='' and detect(x)!='en':
-            #print("hehe")
             if is_date(match.group(1))==False and  detect(match.group(1))=='en':
                 return (match.group(1))
     return article
 
 
-# In[17]:
+
 
 
 #to get publication/articles titles from winner wiki page
@@ -186,7 +176,6 @@ def parse_articles(list_of_names,doc):
     author_au_regex=re.compile('(?<=au\=)[\w%+\d\.]+(?=\&)')
     author_title_regex=re.compile('(?<=atitle\=)[\w%+\d\.\-]+(?=\&)')
     book_title_regex=re.compile('(?<=btitle\=)[\w%+\d\.\-]+(?=\&)')
-    #list_of_names=name_dict[crawled_file]['all_names'] 
     list_of_names=[clean_data.strip_accents(each_name) for each_name in list_of_names]
     extra_words.extend(list_of_names)
     extra_words=[each_x.lower() for each_x in  extra_words]
@@ -205,6 +194,7 @@ def parse_articles(list_of_names,doc):
                 all_articles.update(set(each_elem.xpath('.//li/i/text()'))) 
             else:
                 all_articles.update(set([each_y.strip('"') for each_y in each_elem.xpath('.//a[@rel="nofollow"]/text()')]))
+    #journals
     journal_elements=doc.xpath('//*[@class="citation journal" or @class="citation" or @class="citation thesis"]/following-sibling::span[1]/@title')
     for each_elem in journal_elements:
         if re.search(author_title_regex,each_elem):
@@ -218,8 +208,6 @@ def parse_articles(list_of_names,doc):
                 if 'span' in title and 'style' in title:
                     title=re.sub('span(.*)(span(?!.*span))',' ',title)
                 all_articles.add(title)
-    #print("all articles",all_articles)
-#     all_articles=[strip_accents(each_article) for each_article in all_articles]
     new_articles=[clean_data.clean_unicode_characters(each_article) for each_article in all_articles if not any(t in each_article.lower() for t in extra_words)] 
     new_articles=[re.sub('\s+', ' ', re.sub('\([\s\d\-]+\)|\d+$', '',each_article)).strip() for each_article in new_articles] 
     new_articles=[each_article for each_article in new_articles if not re.match("^[A-Z0-9/\.\-]+$",each_article) and each_article!='']
@@ -227,7 +215,7 @@ def parse_articles(list_of_names,doc):
     return new_articles
 
 
-# In[18]:
+
 
 
 #to get co-authors(doctoral advisors/students from infobox) and colloborators from author's original publications
@@ -260,7 +248,6 @@ def parse_co_authors_from_articles(doc):
             if re.search(author_name_regex,each_elem):
                  co_authors.append(re.findall(author_name_regex,each_elem)[0])
     co_authors=set([clean_data.strip_accents(each_co_author) for each_co_author in co_authors if not re.search('[\d\\\\]', each_co_author)  ])
-   # print("co",set(co_authors))
     new_co_authors=[]
     for each_coauthor in set(co_authors):
         if regexp_2.search(each_coauthor):
@@ -271,14 +258,12 @@ def parse_co_authors_from_articles(doc):
     return(set(new_co_authors))
 
 
-# In[19]:
 
 
 #method to get all relevant information(articles/publications,co-authors,institutions) for a winner from WIKI
 def get_wiki_information(prize_type,doc_num,doc):
     n=doc.xpath('//link[@rel="canonical"]/@href')
     base_url=n[0]
-    #continue
     all_articles=set()
     name_set=set()
     nickname=None
@@ -410,7 +395,6 @@ def get_wiki_information(prize_type,doc_num,doc):
     return {prize_type+'-document-'+'{0}'.format(doc_num):{'preferred_name':final_personality_name,'all_names':new_name_set,'institutions':institutions,'articles':all_articles,'co_authors':set(co_authors),'article_co_authors':set(article_co_authors) }}
 
 
-# In[ ]:
 
 
 

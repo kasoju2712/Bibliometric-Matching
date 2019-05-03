@@ -11,13 +11,13 @@ from unidecode import  unidecode
 import unicodedata
 
 
-# In[14]:
+
 
 
 get_ipython().run_cell_magic('bash', '', 'jupyter nbconvert clean_data.ipynb --to script')
 
 
-# In[2]:
+
 
 
 def remove_punctuation(personality_name):
@@ -33,7 +33,7 @@ def remove_punctuation(personality_name):
     return personality_name
 
 
-# In[3]:
+
 
 
 def remove_roman_and_period(personality_name):
@@ -52,7 +52,6 @@ def remove_roman_and_period(personality_name):
     return personality_name
 
 
-# In[7]:
 
 
 def strip_accents(text):
@@ -66,7 +65,7 @@ def strip_accents(text):
     return str(text)
 
 
-# In[9]:
+
 
 
 def clean_unicode_characters(article_title):

@@ -31,6 +31,8 @@ Modules
 
 Execution
 ---------
-1) Execute Nobel_prize_crawl with required modules imported
+1) Execute Nobel_prize_crawl with required modules imported.
+
  -> First part of the execution deals with crawling laureate's wiki page and extracting relevant information
+ 
  -> Second part of the execution deals with with using the crawled information to uniquely identify laureate in Web of Science.
