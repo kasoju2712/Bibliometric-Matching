@@ -4,57 +4,52 @@
 
 
 
-get_ipython().magic('load_ext autoreload')
-get_ipython().magic('reload_ext autoreload')
-
+#get_ipython().magic('load_ext autoreload')
+#get_ipython().magic('reload_ext autoreload')
 
 
 
 
 import requests
-import lxml.html as lh
+import lxml.html as hl
+from xml.etree import ElementTree
 import pandas as pd
+import numpy as np
+
 from bs4 import BeautifulSoup
 from queue import Queue, Empty
 from urllib.parse import urljoin, urlparse
-from lxml import html
 import urllib.robotparser
+
 import string
 import json
-from itertools import chain
-from xml.etree import ElementTree
+import pickle
+import re
+import unicodedata
 from unidecode import  unidecode
+
+from itertools import chain
+from collections import Counter
+
 from urllib.parse import unquote
 import operator
 from matplotlib import pyplot as plt
-import numpy as np
-from collections import Counter
+
+
 import math
 import statistics
-from itertools import chain
+
 import WOSutilities as wosutil
 from nameparser import HumanName
 import name_tools
-from xml.etree import ElementTree
-import re
-import unicodedata
-from xml.etree import ElementTree
-import unicodedata
-import clean_data as clean_data
-import parse_web  as parse_web
-import match_utilities as match_utilities
-import load_data as load_data
-import langid
-from unidecode import  unidecode
-import re
-import unicodedata
-import re
-from nameparser import HumanName
-import pickle
-import pandas as pd
+
+
+
 import enchant
 d=enchant.Dict('en_US')
 import imp
+
+
 #import load_data as load_data
 
 

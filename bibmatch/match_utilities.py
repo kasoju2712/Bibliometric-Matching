@@ -11,7 +11,7 @@ import itertools
 from itertools import chain,product
 from fuzzywuzzy import fuzz
 from fuzzywuzzy import process
-import clean_data as clean_data
+import bibmatch.clean_data as clean_data
 import enchant
 d = enchant.Dict('en_US')
 
@@ -19,7 +19,7 @@ d = enchant.Dict('en_US')
 
 
 
-get_ipython().run_cell_magic('bash', '', 'jupyter nbconvert match_utilities.ipynb --to script')
+#get_ipython().run_cell_magic('bash', '', 'jupyter nbconvert match_utilities.ipynb --to script')
 
 
 

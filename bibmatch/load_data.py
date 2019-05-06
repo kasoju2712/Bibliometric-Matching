@@ -8,7 +8,6 @@ import pandas as pd
 import numpy as np
 from collections import Counter
 import itertools
-import itertools
 import WOSutilities as wosutil
 path2rawdata='/home/apoorva_kasoju2712/WOS_data'
 

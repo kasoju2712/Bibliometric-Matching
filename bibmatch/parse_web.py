@@ -14,7 +14,7 @@ from xml.etree import ElementTree
 from unidecode import  unidecode
 from urllib.parse import unquote
 import time
-import clean_data as clean_data
+import bibmatch.clean_data as clean_data
 import requests
 import lxml.html as lh
 import re
@@ -28,7 +28,7 @@ import langid
 
 
 
-get_ipython().run_cell_magic('bash', '', 'jupyter nbconvert parse_web.ipynb --to script')
+#get_ipython().run_cell_magic('bash', '', 'jupyter nbconvert parse_web.ipynb --to script')
 
 
 

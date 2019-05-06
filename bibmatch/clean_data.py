@@ -14,7 +14,7 @@ import unicodedata
 
 
 
-get_ipython().run_cell_magic('bash', '', 'jupyter nbconvert clean_data.ipynb --to script')
+#get_ipython().run_cell_magic('bash', '', 'jupyter nbconvert clean_data.ipynb --to script')
 
 
 
