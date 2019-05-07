@@ -28,7 +28,7 @@ d = enchant.Dict('en_US')
 #creating dataframe to store author information based on last name candidates for crawled authors
 def get_wos_records(nobel_winner_wiki_information,author_df):
     author_new_df=None
-    count=0    
+    count=0
     for crawled_file,v in nobel_winner_wiki_information.items():
         preferred_name=v['preferred_name']
         print(preferred_name)
@@ -41,17 +41,17 @@ def get_wos_records(nobel_winner_wiki_information,author_df):
         personality_name=personality_name.replace("(",'"').replace(")",'"')
         personality_name=personality_name.strip("\n").strip("\t").strip(" ")
         last_word=personality_name.split(" ")[-1]
-        first_name=personality_name.split(" ")[0] 
+        first_name=personality_name.split(" ")[0]
         if "-" in last_word:
             last_words=last_word.split("-")
-            last_word=last_words[-1]     
+            last_word=last_words[-1]
         a=None
         b=None
-        c=None 
+        c=None
         if last_word==name.last:
-            b=author_df.loc[(author_df['LastName'] == name.last) | (author_df['LastName'] == name.last.upper())   ][['FullName','AuthorDAIS','AuthorOrder','ArticleID','LastName','FirstName']]  
+            b=author_df.loc[(author_df['LastName'] == name.last) | (author_df['LastName'] == name.last.upper())   ][['FullName','AuthorDAIS','AuthorOrder','ArticleID','LastName','FirstName']]
         else:
-            b=author_df.loc[(author_df['LastName'] == name.last) | (author_df['LastName'] == name.last.upper())|(author_df['LastName'] == last_word)| (author_df['LastName'] == last_word.upper())][['FullName','AuthorDAIS','AuthorOrder','ArticleID','LastName','FirstName']]  
+            b=author_df.loc[(author_df['LastName'] == name.last) | (author_df['LastName'] == name.last.upper())|(author_df['LastName'] == last_word)| (author_df['LastName'] == last_word.upper())][['FullName','AuthorDAIS','AuthorOrder','ArticleID','LastName','FirstName']]
         if b.empty:
             if not d.check(personality_name):
                 b=author_df.loc[(author_df['LastName'] == first_name)][['FullName','AuthorDAIS','AuthorOrder','ArticleID','LastName','FirstName']]
@@ -69,7 +69,7 @@ def get_wos_records(nobel_winner_wiki_information,author_df):
 def check_if_initial(firstmiddleparts,crawled_firstmidlleparts):
     first_name=firstmiddleparts[0]
     if len(first_name)==1:
-        return False  
+        return False
     if len(crawled_firstmidlleparts)==len(first_name):
         for i in range(0,len(first_name)):
             if not crawled_firstmidlleparts[i][0]==first_name[i]:
@@ -78,7 +78,7 @@ def check_if_initial(firstmiddleparts,crawled_firstmidlleparts):
             return True
         return False
     else:
-        return False  
+        return False
 
 
 
@@ -100,7 +100,7 @@ def vector_for_match_names(set_of_wos_names,set_of_wiki_names):
                 for x in l:
                     if "-" in x:
                         set_wiki_first_middle.append(x.split("-"))
-                
+
             else:
                 crawled_lastname=crawled_full_name_splits[-1]
                 crawled_firstmiddleparts=crawled_full_name_splits[:-1]
@@ -139,14 +139,14 @@ def vector_for_match_names(set_of_wos_names,set_of_wiki_names):
     vector.append(0 if len(set([each_first_middle[1] for each_first_middle in set_wiki_first_middle if len(each_first_middle)>1]).intersection(set([each_first_middle[0] for each_first_middle in set_wos_first_middle])))==0 else 1                or 0 if len(set([each_first_middle[1] for each_first_middle in set_wos_first_middle if len(each_first_middle)>1]).intersection(set([each_first_middle[0] for each_first_middle in set_wiki_first_middle])))==0 else 1 )
    #char 3 -> If Middle_name(WOS)==Middle_name(Wikipedia)
     vector.append(0 if len(set([each_first_middle[1] for each_first_middle in set_wiki_first_middle if len(each_first_middle)>1]).intersection(set([each_first_middle[1] for each_first_middle in set_wos_first_middle if len(each_first_middle)>1])))==0 else 1)
-   #char 4-> 1 and 3 
+   #char 4-> 1 and 3
     vector.append(vector[0] and vector[2])
     #char 5 -> If 1st char of First_name(WOS)==1st char of First_name(Wikipedia)
     vector.append(0 if len(set([each_first_middle[0][0] for each_first_middle in set_wiki_first_middle]).intersection(set([each_first_middle[0][0] for each_first_middle in set_wos_first_middle])))==0 else 1)
     #char 6 -> If 1st char of First_name(WOS)==1st char of Middle_name(Wikipedia) or if 1st char of Middle_name(WOS)==1st char of First_name(Wiki)
     vector.append(0 if len(set([each_first_middle[1][0] for each_first_middle in set_wiki_first_middle if len(each_first_middle)>1]).intersection(set([each_first_middle[0][0] for each_first_middle in set_wos_first_middle])))==0 else 1                or 0 if len(set([each_first_middle[1][0] for each_first_middle in set_wos_first_middle if len(each_first_middle)>1]).intersection(set([each_first_middle[0][0] for each_first_middle in set_wiki_first_middle])))==0 else 1 )
     #--exclusions
-    #char 7 -> Not (First_name(WOS)==First_name(Wikipedia) or First_name(WOS)==Middle_name(Wikipedia)) 
+    #char 7 -> Not (First_name(WOS)==First_name(Wikipedia) or First_name(WOS)==Middle_name(Wikipedia))
     vector.append(1 if any(True for x in set([each_first_middle[0] for each_first_middle in set_wos_first_middle if len(each_first_middle[0])>1]) if x  not in list(set([each_first_middle[0] for each_first_middle in set_wiki_first_middle if len(each_first_middle[0])>1])))==True else 0 )
     return ''.join(map(str,vector))
 
@@ -176,24 +176,24 @@ def match_co_authors(list_of_articleID,list_of_last_names,co_authors,title_co_au
             articleID_list=list_of_articleID
             list_of_wos_last_and_full=[]
             for index, row in (article_co_author.query("ArticleID in @articleID_list")[['LastName','FullName']]).iterrows():
-                list_of_wos_last_and_full.extend(list(zip(row['LastName'], row['FullName'])))  
+                list_of_wos_last_and_full.extend(list(zip(row['LastName'], row['FullName'])))
                 #print("row",row['FullName'])
                 list_of_wos_full_names.extend(row['FullName'])
             list_of_wos_last_and_full=[(each_name[0].lower(),each_name[1].lower()) for each_name in list_of_wos_last_and_full if not each_name[0].lower() in personality_last_names ]
             list_of_wos_last_and_full=list(set(list_of_wos_last_and_full))
         #print("list of wos last and full",list_of_wos_last_and_full)
             list_of_wos_last_names=[each[0] for each in list_of_wos_last_and_full]
-            if  len(list_of_wos_last_names)>0:  
+            if  len(list_of_wos_last_names)>0:
                 for x in itertools.product(list_of_wos_last_names,list_of_wiki_last_names) :
                     if fuzz.token_sort_ratio(*x) >=90:
                         wos_set=set()
                         wos_set.add(list_of_wos_last_and_full[(list_of_wos_last_names.index(x[0]))][1])
                         wiki_set=set()
                         wiki_set.add(list_of_wiki_last_and_full[(list_of_wiki_last_names.index(x[1]))][1])
-                        score_vector=vector_for_match_names(wos_set,wiki_set) 
+                        score_vector=vector_for_match_names(wos_set,wiki_set)
                         if sum(map(int,list(score_vector[:-1])) )-int(score_vector[-1]) >=1:
-                            num_of_matches.add(list_of_wos_last_and_full[(list_of_wos_last_names.index(x[0]))][1])  
-            
+                            num_of_matches.add(list_of_wos_last_and_full[(list_of_wos_last_names.index(x[0]))][1])
+
     if title_co_authors:
         title_co_authors=[re.sub(r'(?<=\w)[\.](?=\w)', r' ',str(re.sub(r'(?<=\.)\-', r' ',str(re.sub(r'(\.)$', r'', str(re.sub(r'(\.)[\s\-]+', r'', retrieved_name))))))) for retrieved_name in title_co_authors]
         k=[HumanName(name).last for name in list(title_co_authors) ]
@@ -205,11 +205,11 @@ def match_co_authors(list_of_articleID,list_of_last_names,co_authors,title_co_au
             list_of_wos_full_names=list(chain.from_iterable((article_co_author.query("ArticleID in @articleID_list")['FullName']).tolist()))
         list_of_wos_full_names=[each_name.lower() for each_name in list_of_wos_full_names if (HumanName(each_name).last).lower() not in personality_last_names]
         list_of_wos_full_names=list(set(list_of_wos_full_names))
-        if  len(list_of_wos_full_names)>0:  
+        if  len(list_of_wos_full_names)>0:
             for x in itertools.product(list_of_wos_full_names,list_of_title_coauthor_names) :
                 if fuzz.token_sort_ratio(*x) >=97:
                     num_of_matches.add(x[0])
-    return len(num_of_matches)    
+    return len(num_of_matches)
 def match_articles(list_of_wos_articles,list_of_wiki_articles):
     list_of_wos_articles=list(filter(lambda x:str(x)!='nan' ,list_of_wos_articles))
     list_of_wos_articles = [each_article.lower() for each_article in list_of_wos_articles]
@@ -249,9 +249,9 @@ def find_best_match(author_wiki_information,author_address_article_new,article_c
         print(personality_name)
         m=author_address_article_new
         last_name=personality_name.split(" ")[-1]
-        first_name=personality_name.split(" ")[0] 
+        first_name=personality_name.split(" ")[0]
         if len(personality_name.split(" "))>2:
-            middle_name=personality_name.split(" ")[1] 
+            middle_name=personality_name.split(" ")[1]
         name=HumanName(personality_name)
         if last_name==name.last:
             s=m.groupby('LastName').filter(lambda x: any(x['LastName'] == last_name) | any(x['LastName'] == last_name.upper()))
@@ -282,11 +282,11 @@ def find_best_match(author_wiki_information,author_address_article_new,article_c
             elif len(grouped_df[grouped_df['match_co_author']>0])>0:
                 max_grouped_df=grouped_df[grouped_df['match_co_author']==grouped_df['match_co_author'].max()]
                 match_co_author_dict.update({k:[max_grouped_df.iloc[0].AuthorDAIS,author_wiki_information[k]['preferred_name']]})
-            else:   
+            else:
                 score_grouped_df=grouped_df[grouped_df['total_score']==grouped_df['total_score'].max()]
                 if len(score_grouped_df)==1:
                     high_score_dict.update({k:[score_grouped_df.iloc[0].AuthorDAIS,author_wiki_information[k]['preferred_name']]})
-                else:   
+                else:
                     tie_match_dict.update({k:[score_grouped_df.iloc[0].AuthorDAIS,author_wiki_information[k]['preferred_name']]})
         else:
             no_match_dict.update({k:[None,author_wiki_information[k]['preferred_name']]})

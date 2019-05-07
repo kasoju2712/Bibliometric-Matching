@@ -8,11 +8,58 @@ import pandas as pd
 import numpy as np
 from collections import Counter
 import itertools
-import WOSutilities as wosutil
-path2rawdata='/home/apoorva_kasoju2712/WOS_data'
+import os
+#import WOSutilities as wosutil
+#path2rawdata='/home/apoorva_kasoju2712/WOS_data'
 
 
+def load_wos_data(name = 'article', year_list = None, columns = None,
+          duplicate_subset = ['ArticleID'], path2rawdata = '',
+          dropna = None, isindict = None, verbose = False):
 
+  if year_list is None:
+    year_list = [1900] + list(range(1945, 2017))
+  year_list = map(str, year_list)
+
+  file_df_list = []
+  ifile = 0
+  for year in year_list:
+    for df_file in os.listdir(os.path.join(path2rawdata, name)):
+      if "WR_" + year in df_file:
+
+        fname = os.path.join(path2rawdata, name, df_file)
+        subdf = pd.read_hdf(fname, mode = 'r')
+
+        if type(columns) is list:
+          subdf = subdf[columns]
+
+        if type(dropna) is list:
+          subdf.dropna(subset = dropna, inplace = True, how = 'any')
+
+        if type(isindict) is dict:
+          for isinkey, isinlist in isindict.items():
+            subdf = subdf[isin_sorted(subdf[isinkey], isinlist)]
+
+        # date tag to keep most recent entry
+        filetag = df_file.split('_')[2]
+        subdf['filetag'] = filetag
+
+        file_df_list.append(subdf)
+        ifile += 1
+        if verbose and ifile % verbose == 0:
+          print(ifile)
+
+  df = pd.concat(file_df_list)
+
+  # take most recent entries according to filetag
+  df.sort_values(by = 'filetag', inplace = True)
+  df.drop_duplicates(subset = duplicate_subset, keep = 'last', inplace = True)
+  del df['filetag']
+
+  if verbose:
+    print("Final DF Shape", df.shape)
+
+  return df
 
 
 def load_author_data():
@@ -51,53 +98,53 @@ def load_author_data():
 
 def load_article_data():
     article_df_1 = wosutil.load_wos_data(name = 'article', path2rawdata = path2rawdata,
-                                   year_list = [1900] + list(range(1945, 1955)), 
-                          columns = ['ArticleID','Title', 'PubYear','Doctypes'], 
-                          dropna = ['ArticleID', 'PubYear'], 
+                                   year_list = [1900] + list(range(1945, 1955)),
+                          columns = ['ArticleID','Title', 'PubYear','Doctypes'],
+                          dropna = ['ArticleID', 'PubYear'],
                            duplicate_subset = ['ArticleID'],
-                          isindict = {'Doctypes':np.sort(['Article','Letter','Review','Note'])}, 
+                          isindict = {'Doctypes':np.sort(['Article','Letter','Review','Note'])},
                         verbose = 50)
     del article_df_1['Doctypes']
     #print("Completed in %f" % (time.time() - st))
 
     article_df_2 = wosutil.load_wos_data(name = 'article', path2rawdata = path2rawdata,
-                                   year_list = list(range(1955, 1965)), 
-                          columns = ['ArticleID','Title','PubYear','Doctypes'], 
-                          dropna = ['ArticleID', 'PubYear'], 
+                                   year_list = list(range(1955, 1965)),
+                          columns = ['ArticleID','Title','PubYear','Doctypes'],
+                          dropna = ['ArticleID', 'PubYear'],
                            duplicate_subset = ['ArticleID'],
-                          isindict = {'Doctypes':np.sort(['Article','Letter','Review','Note'])}, 
+                          isindict = {'Doctypes':np.sort(['Article','Letter','Review','Note'])},
                         verbose = 50)
     del article_df_2['Doctypes']
     article_df_3 = wosutil.load_wos_data(name = 'article', path2rawdata = path2rawdata,
-                                   year_list = list(range(1965, 1975)), 
-                          columns = ['ArticleID', 'Title','PubYear','Doctypes'], 
-                          dropna = ['ArticleID', 'PubYear'], 
+                                   year_list = list(range(1965, 1975)),
+                          columns = ['ArticleID', 'Title','PubYear','Doctypes'],
+                          dropna = ['ArticleID', 'PubYear'],
                            duplicate_subset = ['ArticleID'],
-                          isindict = {'Doctypes':np.sort(['Article','Letter','Review','Note'])}, 
+                          isindict = {'Doctypes':np.sort(['Article','Letter','Review','Note'])},
                         verbose = 50)
     del article_df_3['Doctypes']
     article_df_4 = wosutil.load_wos_data(name = 'article', path2rawdata = path2rawdata,
-                                   year_list = list(range(1975, 1990)), 
-                          columns = ['ArticleID', 'Title','PubYear','Doctypes'], 
-                          dropna = ['ArticleID', 'PubYear'], 
+                                   year_list = list(range(1975, 1990)),
+                          columns = ['ArticleID', 'Title','PubYear','Doctypes'],
+                          dropna = ['ArticleID', 'PubYear'],
                            duplicate_subset = ['ArticleID'],
-                          isindict = {'Doctypes':np.sort(['Article','Letter','Review','Note'])}, 
+                          isindict = {'Doctypes':np.sort(['Article','Letter','Review','Note'])},
                         verbose = 50)
     del article_df_4['Doctypes']
     article_df_5 = wosutil.load_wos_data(name = 'article', path2rawdata = path2rawdata,
-                                   year_list = list(range(1990, 2005)), 
-                          columns = ['ArticleID','Title', 'PubYear','Doctypes'], 
-                          dropna = ['ArticleID', 'PubYear'], 
+                                   year_list = list(range(1990, 2005)),
+                          columns = ['ArticleID','Title', 'PubYear','Doctypes'],
+                          dropna = ['ArticleID', 'PubYear'],
                            duplicate_subset = ['ArticleID'],
-                          isindict = {'Doctypes':np.sort(['Article','Letter','Review','Note'])}, 
+                          isindict = {'Doctypes':np.sort(['Article','Letter','Review','Note'])},
                         verbose = 50)
     del article_df_5['Doctypes']
     article_df_6 = wosutil.load_wos_data(name = 'article', path2rawdata = path2rawdata,
-                                   year_list = list(range(2005, 2016)), 
-                          columns = ['ArticleID', 'Title','PubYear','Doctypes'], 
-                          dropna = ['ArticleID', 'PubYear'], 
+                                   year_list = list(range(2005, 2016)),
+                          columns = ['ArticleID', 'Title','PubYear','Doctypes'],
+                          dropna = ['ArticleID', 'PubYear'],
                            duplicate_subset = ['ArticleID'],
-                          isindict = {'Doctypes':np.sort(['Article','Letter','Review','Note'])}, 
+                          isindict = {'Doctypes':np.sort(['Article','Letter','Review','Note'])},
                         verbose = 50)
     del article_df_6['Doctypes']
     article_df_12=pd.concat([article_df_1, article_df_2], ignore_index=True)
@@ -123,34 +170,34 @@ def load_address_data():
     #loading address
     #[ArticleID,AuthorOrder,AddressOrder,Organization,SubOrganization]
     address_df_1 = wosutil.load_wos_data(name = 'address', path2rawdata = path2rawdata,
-                                   year_list =[1900]+list(range(1945, 1955)), 
-                           columns = ['ArticleID','AuthorOrder','AddressOrder','Organization','SubOrganization'], 
-                           duplicate_subset = None, 
+                                   year_list =[1900]+list(range(1945, 1955)),
+                           columns = ['ArticleID','AuthorOrder','AddressOrder','Organization','SubOrganization'],
+                           duplicate_subset = None,
                            verbose = 50)
     address_df_2 = wosutil.load_wos_data(name = 'address', path2rawdata = path2rawdata,
-                                   year_list =list(range(1955, 1965)), 
-                           columns = ['ArticleID','AuthorOrder','AddressOrder','Organization','SubOrganization'], 
-                           duplicate_subset = None, 
+                                   year_list =list(range(1955, 1965)),
+                           columns = ['ArticleID','AuthorOrder','AddressOrder','Organization','SubOrganization'],
+                           duplicate_subset = None,
                            verbose = 50)
     address_df_3 = wosutil.load_wos_data(name = 'address', path2rawdata = path2rawdata,
-                                   year_list =list(range(1965, 1975)), 
-                           columns = ['ArticleID','AuthorOrder','AddressOrder','Organization','SubOrganization'], 
-                           duplicate_subset = None, 
+                                   year_list =list(range(1965, 1975)),
+                           columns = ['ArticleID','AuthorOrder','AddressOrder','Organization','SubOrganization'],
+                           duplicate_subset = None,
                            verbose = 50)
     address_df_4 = wosutil.load_wos_data(name = 'address', path2rawdata = path2rawdata,
-                                   year_list =list(range(1975, 1990)), 
-                           columns = ['ArticleID','AuthorOrder','AddressOrder','Organization','SubOrganization'], 
-                           duplicate_subset = None, 
+                                   year_list =list(range(1975, 1990)),
+                           columns = ['ArticleID','AuthorOrder','AddressOrder','Organization','SubOrganization'],
+                           duplicate_subset = None,
                            verbose = 50)
     address_df_5 = wosutil.load_wos_data(name = 'address', path2rawdata = path2rawdata,
-                                   year_list =list(range(1990, 2005)), 
-                           columns = ['ArticleID','AuthorOrder','AddressOrder','Organization','SubOrganization'], 
-                           duplicate_subset = None, 
+                                   year_list =list(range(1990, 2005)),
+                           columns = ['ArticleID','AuthorOrder','AddressOrder','Organization','SubOrganization'],
+                           duplicate_subset = None,
                            verbose = 50)
     address_df_6 = wosutil.load_wos_data(name = 'address', path2rawdata = path2rawdata,
-                                   year_list =list(range(2005, 2016)), 
-                           columns = ['ArticleID','AuthorOrder','AddressOrder','Organization','SubOrganization'], 
-                           duplicate_subset = None, 
+                                   year_list =list(range(2005, 2016)),
+                           columns = ['ArticleID','AuthorOrder','AddressOrder','Organization','SubOrganization'],
+                           duplicate_subset = None,
                            verbose = 50)
     address_df_12=pd.concat([address_df_1, address_df_2], ignore_index=True)
     del address_df_1
@@ -175,35 +222,35 @@ def load_paper_address_data():
     #loading paper address
     #[ArticleID,AddressOrder,Organization,SubOrganization]
     paper_address_df_1 = wosutil.load_wos_data(name = 'paper-address', path2rawdata = path2rawdata,
-                                   year_list =[1900]+list(range(1945, 1955)), 
-                           columns = ['ArticleID','AddressOrder','Organization','SubOrganization'], 
-                           duplicate_subset = None, 
+                                   year_list =[1900]+list(range(1945, 1955)),
+                           columns = ['ArticleID','AddressOrder','Organization','SubOrganization'],
+                           duplicate_subset = None,
                            verbose = 50)
     paper_address_df_2 = wosutil.load_wos_data(name = 'paper-address', path2rawdata = path2rawdata,
-                                   year_list =list(range(1955, 1965)), 
-                           columns = ['ArticleID','AddressOrder','Organization','SubOrganization'], 
-                           duplicate_subset = None, 
+                                   year_list =list(range(1955, 1965)),
+                           columns = ['ArticleID','AddressOrder','Organization','SubOrganization'],
+                           duplicate_subset = None,
                            verbose = 50)
     paper_address_df_3 = wosutil.load_wos_data(name = 'paper-address', path2rawdata = path2rawdata,
-                                   year_list =list(range(1965, 1975)), 
-                           columns = ['ArticleID','AddressOrder','Organization','SubOrganization'], 
-                           duplicate_subset = None, 
+                                   year_list =list(range(1965, 1975)),
+                           columns = ['ArticleID','AddressOrder','Organization','SubOrganization'],
+                           duplicate_subset = None,
                            verbose = 50)
     paper_address_df_4 = wosutil.load_wos_data(name = 'paper-address', path2rawdata = path2rawdata,
-                                   year_list =list(range(1975, 1990)), 
-                           columns = ['ArticleID','AddressOrder','Organization','SubOrganization'], 
-                           duplicate_subset = None, 
+                                   year_list =list(range(1975, 1990)),
+                           columns = ['ArticleID','AddressOrder','Organization','SubOrganization'],
+                           duplicate_subset = None,
                            verbose = 50)
     paper_address_df_5 = wosutil.load_wos_data(name = 'paper-address', path2rawdata = path2rawdata,
-                                   year_list =list(range(1990, 2005)), 
-                           columns = ['ArticleID','AddressOrder','Organization','SubOrganization'], 
-                           duplicate_subset = None, 
+                                   year_list =list(range(1990, 2005)),
+                           columns = ['ArticleID','AddressOrder','Organization','SubOrganization'],
+                           duplicate_subset = None,
                            verbose = 50)
 
     paper_address_df_6 = wosutil.load_wos_data(name = 'paper-address', path2rawdata = path2rawdata,
-                                   year_list =list(range(2005, 2016)), 
-                           columns = ['ArticleID','AddressOrder','Organization','SubOrganization'], 
-                           duplicate_subset = None, 
+                                   year_list =list(range(2005, 2016)),
+                           columns = ['ArticleID','AddressOrder','Organization','SubOrganization'],
+                           duplicate_subset = None,
                            verbose = 50)
     paper_address_df_12=pd.concat([paper_address_df_1, paper_address_df_2], ignore_index=True)
     del paper_address_df_1

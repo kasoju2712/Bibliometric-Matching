@@ -27,7 +27,10 @@ setup(name=__package__,
             'pandas',
             'nameparser',
             'bs4',
-            'langdetect'
+            'langdetect',
+            'langid',
+            'python-Levenshtein'
+            #'fuzzywuzzy'
       ],
       include_package_data=True
       )

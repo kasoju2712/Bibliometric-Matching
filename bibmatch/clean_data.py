@@ -39,7 +39,7 @@ def remove_punctuation(personality_name):
 def remove_roman_and_period(personality_name):
     roman = ['I', 'V' , 'X', 'III','II','IV' ]
     roman_exists= [each_roman_literal for each_roman_literal in roman if(each_roman_literal in personality_name)]
-    #based on assumption that roman letter occurs towards end on the name 
+    #based on assumption that roman letter occurs towards end on the name
     if len(roman_exists)>0:
         personality_name=re.sub(r"\s+"+sorted(roman_exists, key=len,reverse=True)[0]+r"$",'',personality_name)
     if re.findall(re.compile(r'(?<=\w)[\'](?=[\w])'),personality_name):
@@ -57,14 +57,19 @@ def remove_roman_and_period(personality_name):
 def strip_accents(text):
     try:
         text = unicode(text, 'utf-8')
-    except (TypeError, NameError): # unicode is a default on python 3 
+    except (TypeError, NameError): # unicode is a default on python 3
         pass
     text = unicodedata.normalize('NFD', text)
     text = text.encode('ascii', 'ignore')
     text = text.decode("utf-8")
     return str(text)
 
-
+def clean_name(name):
+    name = strip_accents(name)
+    name = name.replace('.', ' ')
+    name = name.replace("(",'"').replace(")",'"')
+    name = name.strip("\n").strip("\t").strip(" ")
+    return HumanName(name)
 
 
 
