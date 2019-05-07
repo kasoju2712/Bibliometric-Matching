@@ -1,4 +1,4 @@
-Biblipometric Matching
+Bibliometric Matching
 
 Code for matching Nobel Prize in Physics winner information from Wikipedia to Web of Science Data.To uniquely identify a personality , we build a knowledge graph with features from information obtained through their wikipedia, which includes publications/journal articles , affiliations/institutions associated , co-authors/collaborators and also information from specializations of the personality.
 
