@@ -35,34 +35,45 @@ def author_matching_vector(author1, author2):
 
 
 
-def matching_articles(author1, author2, match_threshold=0.75):
+def matching_articles(author1, author2, similarity_threshold=0.75, return_count = False):
     '''
     use Sorted Levenshtein distance to determine if at least one article title is similar
     '''
+    count = 0
     for a1, a2 in product(author1.article_titles, author2.article_titles):
-        if ratio(a1, a2) >= match_threshold:
-            return True
-    return False
+        if ratio(a1, a2) >= similarity_threshold:
+            if return_count:
+                count += 1
+            else:
+                return True
+    return count
 
-def matching_coauthors(author1, author2, match_threshold=0.75):
+def matching_coauthors(author1, author2, return_count = False):
     '''
     use LastNames and the decision vector to determine if at least one co-author is similar
     '''
+    count = 0
     for a1, a2 in product(author1.coauthor_list, author2.coauthor_list):
         # first check the last names
         if len(a1.full_last_names.intersection(a2.full_last_names)) > 0:
             # then use the decision vector
             if author_matching_vector(a1, a2).sum() >= 1:
-                return True
-    return False
+                if return_count:
+                    count += 1
+                else:
+                    return True
+    return count
 
-def matching_affiliations(author1, author2, match_threshold=0.75):
+def matching_affiliations(author1, author2, similarity_threshold=0.75, return_count = False):
     '''
     use Sorted Levenshtein distance to determine if at least one affiliation is similar
     '''
     for a1, a2 in product(author1.institutions, author2.institutions):
-        if ratio(a1, a2) >= match_threshold:
-            return True
-    return False
+        if ratio(a1, a2) >= similarity_threshold:
+            if return_count:
+                count += 1
+            else:
+                return True
+    return count
 
 

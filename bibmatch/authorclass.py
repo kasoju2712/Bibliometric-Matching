@@ -12,6 +12,7 @@ class author(object):
         self.article_titles = []
         self.institutions = set([])
         self.authorID = None
+        self.other_info = None
 
         self.full_last_names = None
         self.full_middle_names = None
@@ -24,17 +25,21 @@ class author(object):
         elif isinstance(authorobj, str):
             self.from_string(authorobj)
 
-    def _uknown_key(d, k, default_response = ''):
+    def _unknown_key(self, d, k, default_response = ''):
         try:
             return d[k]
         except KeyError:
             return default_response
 
-    def _process_nameset(nameset):
+    def _process_nameset(self, nameset):
         nameset = list(map(clean_data.clean_name, map(str.lower, nameset)))
         for name in nameset:
-            if len(name.first) == 2 and len(name.middle) == 0:
-                name.middle = name.first[1]
+            if len(name.middle) == 0:
+                if len(name.first) == 2:
+                    name.middle = name.first[1]
+                elif len(name.first) == 3:
+                    name.middle = name.first[1] + ' ' + name.first[2]
+
         firstnames = set([name.first for name in nameset if len(name.first) > 0] + [name.first[0] for name in nameset if len(name.first) > 0])
         middlenames = set([mname for name in nameset for mname in name.middle.split(' ') if len(mname) > 0])
         # for last names, take the human last name and the last name by spacing
@@ -42,22 +47,25 @@ class author(object):
         return firstnames, middlenames, lastnames
 
     def from_dict(self, author_dict):
-        self.prefered_name = _uknown_key(author_dict, 'prefered_name', '')
-        self.all_names = _uknown_key(author_dict, 'all_names', set([]))
-        self.coauthor_list = _uknown_key(author_dict, 'co_authors', [])
-        self.article_titles = _uknown_key(author_dict, 'article_titles', [])
-        self.institutions = _uknown_key(author_dict, 'institutions', set([]))
+        self.prefered_name = self._unknown_key(author_dict, 'prefered_name', '')
+        self.all_names = self._unknown_key(author_dict, 'all_names', set([]))
+        self.coauthor_list = self._unknown_key(author_dict, 'co_authors', [])
+        self.article_titles = self._unknown_key(author_dict, 'article_titles', [])
+        self.institutions = self._unknown_key(author_dict, 'institutions', set([]))
 
     def from_string(self, author_string):
         self.prefered_name = author_string
         self.all_names = [author_string]
+
+    def set_id(self, aid):
+        self.authorID = aid
 
     def update_coauthors(self, coauthor_list):
         self.coauthor_list = coauthor_list
 
     def process_author(self):
         # process all of the information associated with an author entry
-        firstnames, middlenames, lastnames = _process_nameset(nameset)
+        firstnames, middlenames, lastnames = self._process_nameset(nameset)
 
         self.full_last_names = set([n for n in lastnames if len(n) > 1])
         self.full_first_names = set([n for n in firstnames if len(n) > 1])

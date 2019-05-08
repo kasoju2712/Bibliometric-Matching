@@ -61,6 +61,11 @@ def load_wos_data(name = 'article', year_list = None, columns = None,
 
   return df
 
+def isin_sorted(values2check, masterlist):
+  index = np.searchsorted(masterlist, values2check, side = 'left')
+  index[index >= masterlist.shape[0]] = masterlist.shape[0] - 1
+  return values2check == masterlist[index]
+
 
 def load_author_data():
     #['ArticleID', 'AuthorOrder', 'AuthorDAIS', 'FullName', 'LastName', 'FirstName', 'Email']

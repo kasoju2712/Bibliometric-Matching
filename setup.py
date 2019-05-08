@@ -30,7 +30,6 @@ setup(name=__package__,
             'langdetect',
             'langid',
             'python-Levenshtein'
-            #'fuzzywuzzy'
       ],
       include_package_data=True
       )
