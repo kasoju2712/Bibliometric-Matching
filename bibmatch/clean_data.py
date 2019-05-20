@@ -97,12 +97,15 @@ def strip_accents(text):
     return str(text)
 
 def clean_name(name):
-    name = strip_accents(name)
-    name = clean_roman(name)
-    name = remove_science_labels(name)
-    name = name.replace('.', ' ')
-    name = name.replace("(",'"').replace(")",'"')
-    name = name.strip("\n").strip("\t").strip(" ")
+    if isinstance(name, str):
+        name = strip_accents(name)
+        name = clean_roman(name)
+        name = remove_science_labels(name)
+        name = name.replace('.', ' ')
+        name = name.replace("(",'"').replace(")",'"')
+        name = name.strip("\n").strip("\t").strip(" ")
+    else:
+        name = ''
     return HumanName(name)
 
 roman = ['I', 'V' , 'X', 'III','II','IV' ]
@@ -111,6 +114,7 @@ def clean_roman(name):
     #based on assumption that roman letter occurs towards end on the name
     if len(roman_exists)>0:
         name=re.sub(r"\s+"+sorted(roman_exists, key=len,reverse=True)[0]+r"$",'',name)
+    return name
 
 def clean_unicode_characters(article_title):
     article_title=strip_accents(article_title)

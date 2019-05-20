@@ -1,5 +1,5 @@
 
-import bibmatch.clean_data as clean_data, sort_process_strings
+import bibmatch.clean_data as clean_data
 
 
 class author(object):
@@ -82,8 +82,8 @@ class author(object):
         self.process_names()
 
         # clean these objects in preparation for fuzzy matching
-        self.processed_article_titles = sort_process_strings(self.article_titles)
-        self.processed_institutions = sort_process_strings(self.institutions)
+        self.processed_article_titles = clean_data.sort_process_strings(self.article_titles)
+        self.processed_institutions = clean_data.sort_process_strings(self.institutions)
 
         # process the co-author list
         new_coauthor_list = []

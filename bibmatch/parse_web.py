@@ -487,7 +487,7 @@ def get_wiki_author(wikidoc):
 
     wiki_author.process_names()
     cleaned_names = set(map(clean_data.clean_name, map(str.lower, wiki_author.all_names)))
-    wiki_author.preferred_name = max(cleaned_names key=len)
+    wiki_author.preferred_name = max(cleaned_names, key=len)
 
     # Now check for any possible co-authors
     wiki_coauthors = parse_wiki_coauthors(doc)
