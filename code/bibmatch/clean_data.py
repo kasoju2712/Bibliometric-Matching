@@ -1,11 +1,14 @@
+
 import string
-from nameparser import HumanName
+import sys
 import re
-from unidecode import  unidecode
+import langid
 import unicodedata
+from nameparser import HumanName
+from unidecode import  unidecode
 from langdetect import detect 
 from dateutil.parser import parse
-import langid
+
 
 # from fuzzy-wuzzy string processing
 PY3 = sys.version_info[0] == 3
@@ -38,6 +41,8 @@ def sort_process_strings(strlist):
     if isinstance(strlist, str):
         return _sort_process(strlist)
     elif isinstance(strlist, list):
+        return [_sort_process(s) for s in strlist]
+    elif isinstance(strlist, set):
         return [_sort_process(s) for s in strlist]
     else:
         return False
@@ -100,34 +105,6 @@ def clean_articles(article_title):
         article_title=detect_lang_and_retrieve(article_title)
         return article_title
 
-def remove_punctuation(personality_name):
-    personality_name=personality_name.replace("-"," ")
-    name=HumanName(personality_name)
-    if name.nickname:
-        personality_name=re.sub(r'\"'+name.nickname+r'\"','',personality_name)
-    personality_name=personality_name.replace(".","")
-    #capitalize first letters of words
-    personality_name=string.capwords(personality_name)
-    # substitute all tabs, newlines and other "whitespace-like" characters.
-    personality_name=re.sub('\s+', ' ', personality_name).strip()
-    return personality_name
-
-
-def remove_roman_and_period(personality_name):
-    roman = ['I', 'V' , 'X', 'III','II','IV' ]
-    roman_exists= [each_roman_literal for each_roman_literal in roman if(each_roman_literal in personality_name)]
-    #based on assumption that roman letter occurs towards end on the name
-    if len(roman_exists)>0:
-        personality_name=re.sub(r"\s+"+sorted(roman_exists, key=len,reverse=True)[0]+r"$",'',personality_name)
-    if re.findall(re.compile(r'(?<=\w)[\'](?=[\w])'),personality_name):
-        personality_name = re.sub(r'(?<=\w)[\'](?=\w)', "", personality_name)
-    personality_name = re.sub(r'(\s)+[\'](?=\w)', "'", personality_name)
-    if "physicist" in personality_name:
-        personality_name=re.sub('\"physicist\"','',personality_name)
-    # substitute all tabs, newlines and other "whitespace-like" characters.
-    personality_name=re.sub('\s+', ' ', personality_name).strip()
-    return personality_name
-
 
 def check_name(name):
     if ',' in name:
@@ -146,10 +123,13 @@ def clean_roman(name):
     #based on assumption that roman letter occurs towards end on the name
     if len(roman_exists)>0:
         name=re.sub(r"\s+"+sorted(roman_exists, key=len,reverse=True)[0]+r"$",'',name)
+        # substitute all tabs, newlines and other "whitespace-like" characters.
+    name=re.sub('\s+', ' ', name).strip()
+    return name
 
 def clean_name(name):
     name = strip_accents(name)
-    name = remove_roman_and_period(name)
+    name = clean_roman(name)
     name = re.sub('Jr\.$', '', name)
     name = name.lower()
     name = remove_science_labels(name)
@@ -159,4 +139,13 @@ def clean_name(name):
     name = re.sub('\s+', ' ', name)
     name = check_name(name)
     return HumanName(name)
+
+def agg_stringlist_with_delim(string_list,delimiter=" | "):
+    """return list of co_authors for a Author ID"""
+    result = set()
+    for each_string in string_list:
+        result.update(set(each_string.split(delimiter)))
+    return list(filter(None, result))
+
+
 

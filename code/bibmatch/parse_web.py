@@ -1,21 +1,37 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-from urllib import robotparser
+
+
+
 from urllib.parse import urljoin, urlparse
-import lxml.html as lh
-import requests
-import re
+from lxml import html
+import urllib.robotparser
+import string
+import json
 from itertools import chain
+from xml.etree import ElementTree
+from unidecode import  unidecode
+from urllib.parse import unquote
 import time
-
 import bibmatch.clean_data as clean_data
-from bibmatch.authorclass import author
-
-from langdetect import detect
+import requests
+import lxml.html as lh
+import re
+from xml.etree import ElementTree
+from langdetect import detect 
 from nameparser import HumanName
 from dateutil.parser import parse
 import langid
+
+
+
+
+
+#get_ipython().run_cell_magic('bash', '', 'jupyter nbconvert parse_web.ipynb --to script')
+
+
+
 
 
 #to checkness politenss policy and canonicalization of url
@@ -25,7 +41,7 @@ def ispolite(absolute_url):
     robotUrl = url + "/robots.txt"
     try:
         if robotUrl not in robot_dict:
-            rp = robotparser.RobotFileParser()
+            rp = urllib.robotparser.RobotFileParser()
             rp.set_url(robotUrl)
             rp.read()
             robot_dict[robotUrl] = rp
@@ -33,7 +49,6 @@ def ispolite(absolute_url):
         return r.can_fetch("*", absolute_url)
     except Exception:
         return True
-
 def normalize_slashes(url):
     url=str(url)
     segments=url.split('/')
@@ -61,8 +76,11 @@ def urlCanonicalization(url, base_url=None):
     return url
 
 
-#get alma_institution/affliations from wiki page
-def parse_institution_webpage(institution_page):
+
+
+
+#get alma_institution/affliations from winner wiki page
+def parse_institutions(institution_page):
     time.sleep(1)
     insitution_name=None
     page = requests.get(institution_page)
@@ -80,7 +98,7 @@ def parse_institution_webpage(institution_page):
 
 
 
-#get articles/publication information from known page(infobox card) of wiki page
+#get articles/publication information from known page(infobox card) of winner wiki page
 def parse_known_for(known_for_page,list_of_names):
     time.sleep(1)
     author_au_regex=re.compile('(?<=au\=)[\w%+\d\.]+(?=\&)')
@@ -108,11 +126,14 @@ def parse_known_for(known_for_page,list_of_names):
                     title=re.sub('span(.*)(span(?!.*span))',' ',title)
                 all_articles.add(title)
     all_articles=[clean_data.strip_accents(each_article) for each_article in all_articles]
-    new_articles=[each_article for each_article in all_articles if not any(t in each_article.lower() for t in extra_words)]
+    new_articles=[each_article for each_article in all_articles if not any(t in each_article.lower() for t in extra_words)] 
     #removing extra whitespaces/tabs and those articles with only spaces-numbers-hyphen-block_letters
-    new_articles=[re.sub('\s+', ' ', re.sub('\([\s\d\-]+\)|\d+$', '',each_article)).strip() for each_article in new_articles]
+    new_articles=[re.sub('\s+', ' ', re.sub('\([\s\d\-]+\)|\d+$', '',each_article)).strip() for each_article in new_articles] 
     new_articles=[each_article for each_article in new_articles if not re.match("^[A-Z0-9/\.\-]+$",each_article) and each_article!='']
     return new_articles
+
+
+
 
 
 #check if string is valid date
@@ -123,12 +144,15 @@ def is_date(string, fuzzy=False):
     :param string: str, string to check for date
     :param fuzzy: bool, ignore unknown tokens in string if True
     """
-    try:
+    try: 
         parse(string, fuzzy=fuzzy)
         return True
 
     except ValueError:
         return False
+
+
+
 
 
 #to detect language of titles(articles)
@@ -143,26 +167,9 @@ def detect_lang_and_retrieve(article):
 
 
 
-def parse_knownfor_articles(set_of_names, doc):
-    # sometimes more technical information is kept on the wikipedia page "Known For"
-    td_elem=doc.xpath('//*[@id="mw-content-text"]//table[contains(@class,"infobox biography vcard")]/tbody/tr/th[contains(text(),"Known")]/following-sibling::td')
-    known_for_articles = set([])
-    if td_elem:
-        known_for_text = td_elem[0].xpath('.//a/text()')
-        if known_for_text:
-            known_for_articles.add(known_for_text[0])
-
-        known_for_hrefs=td_elem[0].xpath('.//a/@href')
-        if known_for_hrefs:
-            for each_href in known_for_hrefs:
-                known_for_page = urlCanonicalization(each_href,base_url)
-                if ispolite(known_for_page):
-                    m = parse_known_for(known_for_page, set_of_names)
-                    if not m is None: known_for_articles.update(m)
-    return known_for_articles
 
 
-#to get publication/articles titles from wiki page
+#to get publication/articles titles from winner wiki page
 def parse_articles(list_of_names,doc):
     extra_words=[each_x.lower() for each_x in ['Biographical Memoirs','Biography','Centennial','Obituary','Birth Centennial','Nobel Foundation','lectures on','PhRvL','physrev','PhRv','RevModPhys']]
     author_last_regex=re.compile('(?<=aulast\=)[\w%+\d\.]+(?=\&)')
@@ -178,13 +185,13 @@ def parse_articles(list_of_names,doc):
     if patent_elements:
         for each_elem in patent_elements:
             if each_elem.xpath('.//li/i'):
-                all_articles.update(set(each_elem.xpath('.//li/i/text()')))
+                all_articles.update(set(each_elem.xpath('.//li/i/text()'))) 
     #publications
     p_elements=doc.xpath('(//*[@id="Publications" or @id="Selected_bibliography" or  @id="Popular_articles" or @id="Bibliography" ]/parent::*)/following-sibling::ul[1]|(//*[@id="Selected_bibliography" or @id="Publications" or   @id="Popular_articles" or @id="Bibliography"]/parent::*)/following-sibling::*/ul')
     if p_elements:
         for each_elem in p_elements:
             if not each_elem.xpath('.//a[@rel="nofollow"]/@href'):
-                all_articles.update(set(each_elem.xpath('.//li/i/text()')))
+                all_articles.update(set(each_elem.xpath('.//li/i/text()'))) 
             else:
                 all_articles.update(set([each_y.strip('"') for each_y in each_elem.xpath('.//a[@rel="nofollow"]/text()')]))
     #journals
@@ -201,11 +208,14 @@ def parse_articles(list_of_names,doc):
                 if 'span' in title and 'style' in title:
                     title=re.sub('span(.*)(span(?!.*span))',' ',title)
                 all_articles.add(title)
-    new_articles=[clean_data.clean_unicode_characters(each_article) for each_article in all_articles if not any(t in each_article.lower() for t in extra_words)]
-    new_articles=[re.sub('\s+', ' ', re.sub('\([\s\d\-]+\)|\d+$', '',each_article)).strip() for each_article in new_articles]
+    new_articles=[clean_data.clean_unicode_characters(each_article) for each_article in all_articles if not any(t in each_article.lower() for t in extra_words)] 
+    new_articles=[re.sub('\s+', ' ', re.sub('\([\s\d\-]+\)|\d+$', '',each_article)).strip() for each_article in new_articles] 
     new_articles=[each_article for each_article in new_articles if not re.match("^[A-Z0-9/\.\-]+$",each_article) and each_article!='']
     new_articles=[detect_lang_and_retrieve(article) for article in new_articles]
     return new_articles
+
+
+
 
 
 #to get co-authors(doctoral advisors/students from infobox) and colloborators from author's original publications
@@ -244,81 +254,13 @@ def parse_co_authors_from_articles(doc):
             name=HumanName(each_coauthor)
             new_co_authors.append((name.last+', '+name.first+' '+name.middle).strip(" "))
         else:
-            new_co_authors.append(each_coauthor)
+            new_co_authors.append(each_coauthor) 
     return(set(new_co_authors))
 
-def parse_wiki_coauthors(doc):
-    co_author_elements=doc.xpath('//th[contains(.//text(),"advisor") or contains(.//text(),"student")]/following-sibling::td[1]')
-    co_authors=[]
-    if co_author_elements:
-        for each_elem in co_author_elements:
-            co_author_elem=each_elem.xpath(".//a/@title")
-            if co_author_elem:
-                co_authors.extend(co_author_elem)
-            co_author_elem2=each_elem.xpath(".//text()")
-            if co_author_elem2:
-                co_authors.extend(co_author_elem2)
-        co_authors=[re.sub("[\(\[].*?[\)\]]", "", x) for x in co_authors]
-        co_authors=[each_l for each_l in co_authors if any( not(("A" <= char and char <= "Z") or ("a" <= char and char <= "z") or (char == " ") or (char=='.')) for char in each_l) is False  and each_l!='' ]
-        co_authors=set(co_authors)
-    return co_authors
 
-def parse_institutions(doc):
-    '''
-    institions appear in two major types:
-    1) affiliated_institutions
 
-    2) alma_maters
-    '''
-    institutions=set()
-    institution_element=doc.xpath('//th[text()="Institutions"]/parent::tr')
-    if institution_element:
-        # look for affiliated institions mentioned on the page
-        affiliated_institutions=institution_element[0].xpath(".//a/@title")
-        if affiliated_institutions:
-                affiliated_institutions=[clean_data.strip_accents(each_affliated_insitute) for  each_affliated_insitute in affiliated_institutions]
-                affiliated_institutions=[re.sub(' +', ' ', re.sub(',','', each_affliated_insitute).strip()).strip() for  each_affliated_insitute in affiliated_institutions]
-                affiliated_institutions=map(str.lower ,affiliated_institutions)
-                institutions.update(set(affiliated_institutions))
 
-        # now go to each instition's page and look for other names commonly used
-        institution_hrefs=institution_element[0].xpath(".//a/@href")
-        if institution_hrefs:
-            for each_href in institution_hrefs:
-                institution_page=urlCanonicalization(each_href,base_url)
-                if not ispolite(institution_page):continue
-                m = parse_institution_webpage(institution_page)
-                if  m==None:
-                    continue
-                else:
-                    institutions.add(m)
-
-    # now we look for alma maters
-    alma_mater=doc.xpath('//th[contains(text(),"Alma")]/parent::tr')
-    if alma_mater:
-        # look for alma_maters mentioned on the page
-        alma_institutions=alma_mater[0].xpath(".//a/@title")
-        if alma_institutions:
-                alma_institutions=[clean_data.strip_accents(each_affliated_insitute) for  each_affliated_insitute in alma_institutions]
-                alma_institutions=[re.sub(' +', ' ', re.sub(',','', each_affliated_insitute).strip()).strip() for  each_affliated_insitute in alma_institutions]
-                alma_institutions=map(lambda x:x.lower(),alma_institutions)
-                institutions.update(set(alma_institutions))
-
-        # now go to each alma_mater's page and look for other names commonly used
-        alma_hrefs=alma_mater[0].xpath(".//a/@href")
-        if alma_hrefs:
-            for each_href in alma_hrefs:
-                institution_page=urlCanonicalization(each_href,base_url)
-                if not ispolite(institution_page):continue
-                m=parse_institution_webpage(institution_page)
-                if  m==None:
-                    continue
-                else:
-                    institutions.add(m)
-
-    return institutions
-
-#method to get all relevant information(articles/publications,co-authors,institutions) from a WIKI page
+#method to get all relevant information(articles/publications,co-authors,institutions) for a winner from WIKI
 def get_wiki_information(prize_type,doc_num,doc):
     n=doc.xpath('//link[@rel="canonical"]/@href')
     base_url=n[0]
@@ -327,7 +269,7 @@ def get_wiki_information(prize_type,doc_num,doc):
     nickname=None
     tr_elements = doc.xpath('//div[@class="mw-parser-output"]/table[@class="infobox biography vcard"]/tbody/tr')
     if tr_elements:
-        for each_id in tr_elements[0].iterchildren():
+        for each_id in tr_elements[0].iterchildren(): 
             if each_id.tag=='th':
                 parts = ([each_id.text] + list(chain(*([c.text, c.tail] for c in each_id.getchildren()))) + [each_id.tail])
                 cell_data_text=''.join(filter(None, parts))
@@ -339,13 +281,13 @@ def get_wiki_information(prize_type,doc_num,doc):
         full_name=full_name_tag[0].text
         if full_name is not None:
             full_name=clean_data.strip_accents(full_name.split(',', 1)[0])
-            name_set.add(full_name)
+            name_set.add(full_name) 
     first_heading_tag=doc.xpath('//*[@id="firstHeading"]')
     if first_heading_tag:
         first_heading_name=first_heading_tag[0].text
         if first_heading_name is not None:
             first_heading_name=clean_data.strip_accents(first_heading_name.split(',', 1)[0])
-            name_set.add(first_heading_name)
+            name_set.add(first_heading_name)  
     new_name_set=set()
     for each_name in name_set:
         nick_name=None
@@ -410,7 +352,7 @@ def get_wiki_information(prize_type,doc_num,doc):
             for each_href in institution_hrefs:
                 institution_page=urlCanonicalization(each_href,base_url)
                 if not ispolite(institution_page):continue
-                m=parse_institution_webpage(institution_page)
+                m=parse_institutions(institution_page)
                 if  m==None:
                     continue
                 else:
@@ -428,7 +370,7 @@ def get_wiki_information(prize_type,doc_num,doc):
             for each_href in alma_hrefs:
                 institution_page=urlCanonicalization(each_href,base_url)
                 if not ispolite(institution_page):continue
-                m=parse_institution_webpage(institution_page)
+                m=parse_institutions(institution_page)
                 if  m==None:
                     continue
                 else:
@@ -452,55 +394,8 @@ def get_wiki_information(prize_type,doc_num,doc):
             all_articles.update(m)
     return {prize_type+'-document-'+'{0}'.format(doc_num):{'preferred_name':final_personality_name,'all_names':new_name_set,'institutions':institutions,'articles':all_articles,'co_authors':set(co_authors),'article_co_authors':set(article_co_authors) }}
 
-def check_nametag(nametag, name_set):
-    # check if name is clean to add to the nameset
-    if nametag and nametag[0].text is not None:
-        name_set.add(clean_data.strip_accents(nametag[0].text.split(',', 1)[0]))
-    return name_set
 
 
-def get_wiki_author(wikidoc):
-    '''
-    main method to parse Wikipedia scientific biographies
-    '''
 
-    base_url = doc.xpath('//link[@rel="canonical"]/@href')[0]
-
-    wiki_author = author()
-
-    # first process the infobox biography
-    tr_elements = doc.xpath('//div[@class="mw-parser-output"]/table[@class="infobox biography vcard"]/tbody/tr')[0]
-    for each_id in tr_elements.iterchildren():
-        if each_id.tag=='th':
-            parts = ([each_id.text] + list(chain(*([c.text, c.tail] for c in each_id.getchildren()))) + [each_id.tail])
-            personality_name=''.join(filter(None, parts))
-            if langid.classify(personality_name)[0]!='zh':
-                wiki_author.all_names.add(clean_data.strip_accents(personality_name))
-
-    # now check the mw for names
-    full_name_tag = doc.xpath('//*[@class="mw-parser-output"]/p[not(@class ="mw-empty-elt")][1]/b')
-    wiki_author.all_names = check_nametag(full_name_tag, wiki_author.all_names)
-
-    # Next check the heading for a name
-    first_heading_tag = doc.xpath('//*[@id="firstHeading"]')
-    wiki_author.all_names = check_nametag(first_heading_tag, wiki_author.all_names)
-
-    wiki_author.process_names()
-    cleaned_names = set(map(clean_data.clean_name, map(str.lower, wiki_author.all_names)))
-    wiki_author.preferred_name = max(cleaned_names, key=len)
-
-    # Now check for any possible co-authors
-    wiki_coauthors = parse_wiki_coauthors(doc)
-    article_co_authors = parse_co_authors_from_articles(doc)
-    wiki_author.coauthor_list = list(wiki_coauthors.union(article_co_authors))
-
-    # Update and instition information on the page or linked
-    wiki_author.institutions = parse_institutions(doc)
-
-    # scan the page for official articles
-    wiki_author.article_titles = parse_articles(cleaned_names, doc)
-    wiki_author.article_titles.update(parse_knownfor_articles(cleaned_names, doc))
-
-    return wiki_author
 
 

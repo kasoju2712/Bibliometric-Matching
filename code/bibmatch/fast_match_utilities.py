@@ -1,7 +1,7 @@
+
 import numpy as np
+import pandas as pd
 from itertools import product
-from bibmatch.clean_data import asciidammit, sort_process_strings
-from bibmatch.clean_data import asciidammit, sort_process_strings
 from Levenshtein import ratio
 
 
@@ -80,5 +80,9 @@ def matching_affiliations(author1, author2, similarity_threshold=0.75, return_co
                 else:
                     return True
     return count
+
+
+def combine_match_result(author1, author2):
+    return pd.Series((matching_coauthors(author1, author2, True),matching_affiliations(author1, author2,0.75,True),matching_articles(author1, author2,0.75,True)))
 
 
