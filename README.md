@@ -24,6 +24,8 @@ Installation
 Modules
 -----------
 bibmatch 
+	
+	
 	1) authorclass - Functions defined to and process author attributes .
 
 	2) clean_data - Functions defined to clean data before matching 
@@ -34,12 +36,12 @@ bibmatch
 
 	5) load_data - Functions and utilities load appropriate dataframes from Web of Science
 
-parse_prize,parse_prize_winner -> to parse prize winner information of various prizes and store in a proper format
+
 
 Execution
 ---------
 
-Part 1  - Extract relevant information of personality from wikipedia using parse_prize,parse_prize_winner scripts.
+Part 1  - Execute parse_prize,parse_prize_winner  scripts to extract winner information from various prizes and store in a proper format
  
 Part 2  - Use the information to uniquely match personality in Web of Science.
 
