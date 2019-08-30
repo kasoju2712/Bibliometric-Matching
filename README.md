@@ -24,15 +24,15 @@ Installation
 Modules
 -----------
 bibmatch 
-	1) authorclass -> Functions defined to and process author attributes .
+	1) authorclass - Functions defined to and process author attributes .
 
-	2) clean_data -> Functions defined to clean data before matching 
+	2) clean_data - Functions defined to clean data before matching 
 
-	3) fast_match_utilities -> Functions defined to match co-authors,organizations and full_names of authors from Wikipedia to Web of Science
+	3) fast_match_utilities - Functions defined to match co-authors,organizations and full_names of authors from Wikipedia to Web of Science
 
-	4) parse_wos -> Functions defined to parse information from Web of Science such as articles,affiliations and co-authors
+	4) parse_wos - Functions defined to parse information from Web of Science such as articles,affiliations and co-authors
 
-	5) load_data -> Functions and utilities load appropriate dataframes from Web of Science
+	5) load_data - Functions and utilities load appropriate dataframes from Web of Science
 
 parse_prize,parse_prize_winner -> to parse prize winner information of various prizes and store in a proper format
 
