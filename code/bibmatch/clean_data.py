@@ -1,13 +1,14 @@
-
 import string
 import sys
 import re
 import langid
+import urllib
 import unicodedata
 from nameparser import HumanName
 from unidecode import  unidecode
 from langdetect import detect 
 from dateutil.parser import parse
+from urllib.parse import unquote
 
 
 # from fuzzy-wuzzy string processing
@@ -66,7 +67,7 @@ def strip_accents(text):
 
 #to detect language of titles(articles)
 def detect_lang_and_retrieve(article):
-    #print(article)
+    print(article)
     match=re.search(r'\((.*?)\)',article)
     #print(match.groups(1))
     if match and len(match.groups())==1:
@@ -100,10 +101,13 @@ def clean_unicode_characters(article_title):
     return article_title
 
 def clean_articles(article_title):
+    #remove invalid titles
+    if re.search('^(?=.*\d)(?=.*[a-z])(?=.*[\/])(?=.*[\.])[a-z0-9\.\/]+$',article_title) or re.search('^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[\.])[a-z0-9A-Z\.]+$',article_title):
+        return None
     article_title=re.sub('\s+', ' ', re.sub('\([\s\d\-]+\)|\d+$', '',article_title)).strip()
     if not re.match("^[A-Z0-9/\.\-]+$",article_title) and article_title!='':
         article_title=detect_lang_and_retrieve(article_title)
-        return article_title
+        return unquote(article_title)
 
 
 def check_name(name):
@@ -127,18 +131,24 @@ def clean_roman(name):
     name=re.sub('\s+', ' ', name).strip()
     return name
 
-def clean_name(name):
+def clean_name(name,return_human_name=True):
     name = strip_accents(name)
+    name_str=HumanName(name)
+    name = name.replace(name_str.title,'')
+    name = re.sub(r'[\(|\"]%s[\)|\"]'% name_str.nickname,'',name).strip()
     name = clean_roman(name)
     name = re.sub('Jr\.$', '', name)
     name = name.lower()
     name = remove_science_labels(name)
     name = name.replace('.', ' ')
-    name = name.replace("(",'"').replace(")",'"').replace("-"," ")
+    name = name.replace("(",'"').replace(")",'"').replace("-"," ").replace('"','')
     name = name.strip("\n").strip("\t").strip(" ")
     name = re.sub('\s+', ' ', name)
     name = check_name(name)
-    return HumanName(name)
+    if return_human_name:
+        return HumanName(name)
+    else :
+        return name
 
 def agg_stringlist_with_delim(string_list,delimiter=" | "):
     """return list of co_authors for a Author ID"""
